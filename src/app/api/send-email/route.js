@@ -1,12 +1,23 @@
 import nodemailer from "nodemailer";
 
 export async function POST(req) {
+  const origin = req.headers.get("origin");
+  const headers = new Headers({
+    "Access-Control-Allow-Origin": origin || "*", // Permitir cualquier origen (solo para pruebas)
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+  });
+
+  if (req.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers });
+  }
+
   const { name, email, message } = await req.json();
 
   if (!name || !email || !message) {
     return new Response(
       JSON.stringify({ message: "Todos los campos son obligatorios." }),
-      { status: 400 }
+      { status: 400, headers }
     );
   }
 
@@ -21,35 +32,23 @@ export async function POST(req) {
       },
     });
 
-    // Configurar el contenido del correo
     await transporter.sendMail({
       from: `"Formulario Web" <${process.env.SMTP_USER}>`,
       to: process.env.SMTP_TO,
       replyTo: email,
       subject: `Nuevo mensaje de contacto de ${name}`,
-      text: `Hola,\n\nTienes un nuevo mensaje de contacto en tu sitio web:\n\nNombre: ${name}\nCorreo: ${email}\n\nMensaje:\n${message}\n\nResponde directamente a este correo para contactar con el cliente.`, // Contenido plano
-      html: `
-        <p><strong>Hola,</strong></p>
-        <p>Tienes un nuevo mensaje de contacto en tu sitio web:</p>
-        <ul>
-          <li><strong>Nombre:</strong> ${name}</li>
-          <li><strong>Correo:</strong> ${email}</li>
-        </ul>
-        <p><strong>Mensaje:</strong></p>
-        <p>${message}</p>
-        <p><em>Responde directamente a este correo para contactar con el cliente.</em></p>
-      `,
+      text: `Nombre: ${name}\nCorreo: ${email}\n\nMensaje:\n${message}`,
     });
 
     return new Response(
       JSON.stringify({ message: "Correo enviado con éxito." }),
-      { status: 200 }
+      { status: 200, headers }
     );
   } catch (error) {
-    console.error("Error enviando correo:", error);
+    console.error("Error al enviar el correo:", error);
     return new Response(
       JSON.stringify({ message: "Error al enviar el correo." }),
-      { status: 500 }
+      { status: 500, headers }
     );
   }
 }
