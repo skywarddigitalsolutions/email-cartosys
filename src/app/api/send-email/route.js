@@ -2,7 +2,7 @@ import nodemailer from "nodemailer";
 
 export async function POST(req) {
   const headers = new Headers({
-    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Origin": "*", // Permitir cualquier origen para pruebas
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
   });
@@ -37,4 +37,19 @@ export async function POST(req) {
       from: `"Formulario Web" <${process.env.SMTP_USER}>`,
       to: process.env.SMTP_TO,
       replyTo: email,
-      sub
+      subject: `Nuevo mensaje de contacto de ${name}`,
+      text: `Nombre: ${name}\nCorreo: ${email}\n\nMensaje:\n${message}`,
+    });
+
+    return new Response(
+      JSON.stringify({ message: "Correo enviado con éxito." }),
+      { status: 200, headers }
+    );
+  } catch (error) {
+    console.error("Error al enviar el correo:", error);
+    return new Response(
+      JSON.stringify({ message: "Error al enviar el correo." }),
+      { status: 500, headers }
+    );
+  }
+}
