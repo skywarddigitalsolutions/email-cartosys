@@ -3,7 +3,7 @@ import nodemailer from "nodemailer";
 export async function POST(req) {
   // Configurar cabeceras CORS
   const headers = new Headers({
-    "Access-Control-Allow-Origin": "https://cartosys.com.ar",
+    "Access-Control-Allow-Origin": "https://cartosys.com.ar/",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
   });
